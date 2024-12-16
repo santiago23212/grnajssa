@@ -1,0 +1,62 @@
+# Tipos principales
+type Cliente {
+  dni: ID!
+  nombre: String!
+  apellido: String!
+  direccion: String
+  telefono: String
+}
+
+type Porcino {
+  id: ID!
+  edad: Int!
+  peso: Float!
+  raza: Raza
+  cliente: Cliente
+  alimentos: [Alimento!]!
+}
+
+type Alimento {
+  id: ID!
+  descripcion: String!
+  dosis: String
+  porcino: Porcino
+}
+
+type Raza {
+  id: ID!
+  nombre: String!
+}
+
+# Operaciones de consulta
+type Query {
+  getClientes: [Cliente!]!
+  getCliente(dni: ID!): Cliente
+  getPorcinos: [Porcino!]!
+  getPorcino(id: ID!): Porcino
+  getAlimentos: [Alimento!]!
+  getAlimento(id: ID!): Alimento
+  getRazas: [Raza!]!
+  getRaza(id: ID!): Raza
+}
+
+# Operaciones de mutación
+type Mutation {
+  # Crear
+  createCliente(dni: ID!, nombre: String!, apellido: String!, direccion: String, telefono: String): Cliente!
+  createPorcino(edad: Int!, peso: Float!, razaId: ID!, clienteDni: ID!): Porcino!
+  createAlimento(descripcion: String!, dosis: String, porcinoId: ID!): Alimento!
+  createRaza(nombre: String!): Raza!
+
+  # Actualizar
+  updateCliente(dni: ID!, nombre: String, apellido: String, direccion: String, telefono: String): Cliente!
+  updatePorcino(id: ID!, edad: Int, peso: Float, razaId: ID, clienteDni: ID): Porcino!
+  updateAlimento(id: ID!, descripcion: String, dosis: String, porcinoId: ID): Alimento!
+  updateRaza(id: ID!, nombre: String): Raza!
+
+  # Eliminar
+  deleteCliente(dni: ID!): Boolean!
+  deletePorcino(id: ID!): Boolean!
+  deleteAlimento(id: ID!): Boolean!
+  deleteRaza(id: ID!): Boolean!
+}

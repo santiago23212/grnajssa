@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Listado de Mascotas</title>
+<link th:href="@{/css/style.css}" rel="stylesheet" />
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+</head>
+<body>
+	<div th:insert="~{navigation::navigation}"></div>
+	<div class="container mt-0 ">
+		<div class="d-flex justify-content-between align-items-center ">
+			<h1>Listado de Mascotas</h1>
+			<button type="button" class="btn bg-dark btn-outline-light py-2 "
+				data-bs-toggle="modal" data-bs-target="#agregarMascotaModal">
+				Agregar Mascota</button>
+		</div>
+		<div class="table-responsive">
+			<table class="table table-hover table-bordered align-middle">
+				<thead class="table-dark">
+					<tr>
+						<th>Código</th>
+						<th>Nombre</th>
+						<th>Raza</th>
+						<th>Edad(Meses)</th>
+						<th>Peso (kg)</th>
+						<th>Dueño</th>
+						<th class="col-auto">Acciones</th>
+					</tr>
+				</thead>
+				<tbody>
+
+
+					<th:block th:each="m : ${mascotas}">
+						<tr>
+
+							<td th:text="${m.Codigo}"></td>
+							<td th:text="${m.Nombre}"></td>
+							<td th:text="${m.Raza}"></td>
+							<td th:text="${m.Edad}"></td>
+							<td th:text="${m.Peso}"></td>
+							<td th:text="${m.NombClient}"></td>
+
+
+							<td class="p-0">
+								<div class="btn-group w-100" role="group">
+
+									<button type="button" class="btn btn-primary btn-sm"
+										data-bs-toggle="modal" data-bs-target="#editarMascotaModal"
+										th:attr="data-id=${m.Codigo}, data-nombre=${m.Nombre}, data-raza=${m.Raza}, data-edad=${m.Edad}, data-peso=${m.Peso}, data-idcl=${m.getCliente.getDni}, data-dueno=${m.NombClient}"
+										onclick="abrirEditarModal(this)">
+										<i class="fas fa-edit"></i> 
+									</button>
+
+
+									<button type="button" class="btn btn-danger btn-sm"
+										data-bs-toggle="modal"
+										data-bs-target="#confirmarEliminarModal"
+										th:attr="data-id=${m.Codigo}"
+										onclick="abrirEliminarModal(this)">
+										<i class="fas fa-trash-alt"></i> 
+									</button>
+
+
+									<a th:href="@{|/Veterinaria/verMedicamentos/${m.Codigo}|}"
+										class="btn btn-info btn-sm"> <i class="fas fa-pills"></i>
+										
+									</a> <a th:href="@{|/Veterinaria/generarPdf/${m.Codigo}|}"
+										class="btn btn-secondary btn-sm"> <i
+										class="fas fa-file-pdf"></i> 
+									</a><a th:href="@{|/XML/generarXML/${m.Codigo}|}"
+										class="btn btn-secondary btn-sm"> <i
+										class="fas fa-file-code"></i> 
+									</a>
+								</div>
+							</td>
+						</tr>
+					</th:block>
+				</tbody>
+
+			</table>
+		</div>
+
+
+		<div class="modal fade" id="agregarMascotaModal" tabindex="-1"
+			aria-labelledby="agregarMascotaModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="agregarMascotaModalLabel">Agregar
+							Nueva Mascota</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"
+							aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<form action="/Veterinaria/guardarMascota" method="post"
+							th:object="${newmascota}">
+							<div class="mb-3">
+								<label for="nombre_mas" class="form-label">Nombre de la
+									Mascota:</label> <input type="text" class="form-control"
+									id="nombre_mas" name="nombre_mas" th:field="*{Nombre}" required>
+							</div>
+							<div class="mb-3">
+								<label for="raza_mas" class="form-label">Raza de la
+									Mascota:</label> <input type="text" class="form-control" id="raza_mas"
+									name="raza_mas" th:field="*{Raza}" required>
+							</div>
+							<div class="mb-3">
+								<label for="edad_mas" class="form-label">Edad de la
+									Mascota(Meses):</label> <input type="number" class="form-control"
+									id="edad_mas" name="edad_mas" th:field="*{Edad}" required>
+							</div>
+							<div class="mb-3">
+								<label for="peso_mas" class="form-label">Peso de la
+									Mascota (kg):</label> <input type="number" step="any"
+									class="form-control" id="peso_mas" name="peso_mas"
+									th:field="*{Peso}" required>
+							</div>
+							<div class="mb-3">
+								<label for="cliente" class="form-label">Dueño:</label> <select
+									class="form-select" id="cliente" name="Dni" required>
+									<option value="">Selecciona el dueño</option>
+									<th:block th:each="cliente : ${clientes}">
+										<option th:value="${cliente.Dni}"><span
+												th:text="${cliente.Nombre}"></span> <span
+												th:text="${cliente.apellido1}"></span> <span
+												th:text="${cliente.apellido2}"></span>
+										</option>
+									</th:block>
+								</select>
+							</div>
+							<button type="submit" class="btn btn-success">Agregar
+								Mascota</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="modal fade" id="editarMascotaModal" tabindex="-1"
+			aria-labelledby="editarMascotaModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="editarMascotaModalLabel">Editar
+							Mascota</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"
+							aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<form action="/Veterinaria/editarMascota" method="post"
+							th:object="${newmascota}">
+
+							<input type="hidden" id="mascotaId" name="id"
+								th:field="*{Codigo}">
+
+							<div class="mb-3">
+								<label for="nombre_mas_edit" class="form-label">Nombre
+									de la Mascota:</label> <input type="text" class="form-control"
+									id="nombre_mas_edit" name="nombre_mas_editar"
+									th:field="*{Nombre}" required>
+							</div>
+							<div class="mb-3">
+								<label for="raza_mas_edit" class="form-label">Raza de la
+									Mascota:</label> <input type="text" class="form-control"
+									id="raza_mas_edit" name="raza_mas_edit" th:field="*{Raza}"
+									required>
+							</div>
+							<div class="mb-3">
+								<label for="edad_mas_edit" class="form-label">Edad de la
+									Mascota(Meses):</label> <input type="number" class="form-control"
+									id="edad_mas_edit" name="edad_mas_edit" th:field="*{Edad}"
+									required>
+							</div>
+							<div class="mb-3">
+								<label for="peso_mas_edit" class="form-label">Peso de la
+									Mascota (kg):</label> <input type="number" step="any"
+									class="form-control" id="peso_mas_edit" name="peso_mas_edit"
+									th:field="*{Peso}" required>
+							</div>
+							<div class="mb-3">
+								<label for="dueno_mas_edit" class="form-label">Dueño:</label> <input
+									type="text" class="form-control" id="dueno_mas_edit"
+									name="dueno_mas" readonly> <input type="hidden"
+									id="dueno_id" name="iddu" th:field="*{NombClient}">
+							</div>
+
+
+							<button type="submit" class="btn btn-success">Guardar
+								Cambios</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="modal fade" id="confirmarEliminarModal" tabindex="-1"
+			aria-labelledby="confirmarEliminarModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="confirmarEliminarModalLabel">Confirmar
+							Eliminación</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"
+							aria-label="Close"></button>
+					</div>
+					<div class="modal-body">¿Estás seguro de que deseas eliminar
+						esta mascota?</div>
+					<div class="modal-footer">
+						<form action="/Veterinaria/eliminarMascota" method="post"
+							th:object="${newmascota}">
+
+							<input type="hidden" id="mascotaEliminarId" name="Codigo"
+								th:field="*{Codigo}">
+							<button type="button" class="btn btn-secondary"
+								data-bs-dismiss="modal">Cancelar</button>
+							<button type="submit" class="btn btn-danger">Eliminar</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+
+		<script
+			src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+
+
+		<script>
+			function abrirEditarModal(button) {
+
+				var id = button.getAttribute("data-id");
+				var nombre = button.getAttribute("data-nombre");
+				var raza = button.getAttribute("data-raza");
+				var edad = button.getAttribute("data-edad");
+				var peso = button.getAttribute("data-peso");
+				var dueno = button.getAttribute("data-dueno");
+				var iddueno = button.getAttribute("data-idcl");
+
+				document.getElementById("mascotaId").value = id;
+				document.getElementById("nombre_mas_edit").value = nombre;
+				document.getElementById("raza_mas_edit").value = raza;
+				document.getElementById("edad_mas_edit").value = edad;
+				document.getElementById("peso_mas_edit").value = peso;
+				document.getElementById("dueno_mas_edit").value = dueno;
+				document.getElementById("dueno_id").value = iddueno;
+
+			}
+
+			function abrirEliminarModal(button) {
+				var id = button.getAttribute("data-id");
+				document.getElementById("mascotaEliminarId").value = id;
+			}
+		</script>
+		<style>
+.btn-sm-custom {
+	padding: 2px 5px;
+	font-size: 0.8rem;
+}
+</style>
+</body>
+</html>

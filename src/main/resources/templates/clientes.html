@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Listado de Clientes</title>
+<link th:href="@{/css/style.css}" rel="stylesheet" />
+<!-- Bootstrap CSS CDN -->
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+	<div th:if="${mensaje}">
+		<script th:inline="javascript">
+			// Mostrar la alerta SweetAlert
+			Swal.fire({
+				title : 'Notificación',
+				text : '[[${mensaje}]]',
+				icon : 'warning',
+				confirmButtonText : 'Aceptar'
+			});
+		</script>
+	</div>
+
+
+	<div th:insert="~{navigation::navigation}"></div>
+	<div class="container mt-0">
+		<div class="d-flex justify-content-between align-items-center">
+			<h1>Listado de Clientes</h1>
+
+			
+			<button type="button" class="btn bg-dark btn-outline-light py-2"
+				data-bs-toggle="modal" data-bs-target="#agregarClienteModal">
+				Agregar Cliente</button>
+		</div>
+
+		<div class="table-responsive">
+			<table class="table table-hover table-bordered align-middle">
+				<thead class="table-dark">
+					<tr>
+						<th>DNI</th>
+						<th>Nombre</th>
+						<th>Apellido 1</th>
+						<th>Apellido 2</th>
+						<th>Dirección</th>
+						<th>Teléfono</th>
+						<th class="col-auto">Acciones</th>
+					</tr>
+				</thead>
+				<tbody>
+
+					<th:block th:each="cliente : ${clientes}">
+						<tr>
+							<td th:text="${cliente.Dni}"></td>
+							<td th:text="${cliente.Nombre}"></td>
+							<td th:text="${cliente.Apellido1}"></td>
+							<td th:text="${cliente.Apellido2}"></td>
+							<td th:text="${cliente.Direccion}"></td>
+							<td th:text="${cliente.Telefono}"></td>
+							<td class="p-0">
+								<div class="btn-group w-100" role="group">
+									
+									<button type="button" class="btn btn-primary btn-sm"
+										data-bs-toggle="modal" data-bs-target="#editarClienteModal"
+										th:attr="data-id=${cliente.Dni}, data-nombre=${cliente.Nombre}, data-apellido1=${cliente.Apellido1}, data-apellido2=${cliente.Apellido2}, data-direccion=${cliente.Direccion}, data-telefono=${cliente.Telefono}"
+										onclick="abrirEditarClienteModal(this)">
+										<i class="fas fa-edit"></i>
+									</button>
+
+									<button type="button" class="btn btn-danger btn-sm"
+										data-bs-toggle="modal"
+										data-bs-target="#confirmarEliminarClienteModal"
+										th:attr="data-id=${cliente.Dni}"
+										onclick="abrirEliminarClienteModal(this)">
+										<i class="fas fa-trash-alt"></i>
+									</button>
+
+									
+									<a th:href="@{|/Veterinaria/verMascotas/${cliente.Dni}|}"
+										class="btn btn-info btn-sm"> <i class="fas fa-paw"></i>
+									</a>
+								</div>
+							</td>
+
+						</tr>
+					</th:block>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	
+	<div class="modal fade" id="agregarClienteModal" tabindex="-1"
+		aria-labelledby="agregarClienteModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="agregarClienteModalLabel">Agregar
+						Nuevo Cliente</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"
+						aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<form action="/Veterinaria/guardarCliente" method="post"
+						th:object="${newcliente}">
+						<div class="mb-3">
+							<label for="dni_cli" class="form-label">DNI del Cliente:</label>
+							<input type="text" class="form-control" id="dni_cli" name="Dni"
+								th:field="*{Dni}" required>
+						</div>
+						<div class="mb-3">
+							<label for="nombre_cliente" class="form-label">Nombre:</label> <input
+								type="text" class="form-control" id="nombre_cliente"
+								th:field="*{Nombre}" required>
+						</div>
+						<div class="mb-3">
+							<label for="apellido1_cliente" class="form-label">Primer
+								Apellido:</label> <input type="text" class="form-control"
+								id="apellido1_cliente" th:field="*{Apellido1}" required>
+						</div>
+						<div class="mb-3">
+							<label for="apellido2_cliente" class="form-label">Segundo
+								Apellido:</label> <input type="text" class="form-control"
+								id="apellido2_cliente" th:field="*{Apellido2}" required>
+						</div>
+						<div class="mb-3">
+							<label for="direccion_cliente" class="form-label">Dirección:</label>
+							<input type="text" class="form-control" id="direccion_cliente"
+								th:field="*{Direccion}" required>
+						</div>
+						<div class="mb-3">
+							<label for="telefono_cliente" class="form-label">Teléfono:</label>
+							<input type="number" class="form-control" id="telefono_cliente"
+								th:field="*{Telefono}" required>
+						</div>
+						<button type="submit" class="btn btn-success">Agregar
+							Cliente</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="editarClienteModal" tabindex="-1"
+		aria-labelledby="editarClienteModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="editarClienteModalLabel">Editar
+						Cliente</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"
+						aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<form action="/Veterinaria/editarCliente" method="post"
+						th:object="${newcliente}">
+						<input type="hidden" id="clienteId" name="id" th:field="*{Dni}">
+						<div class="mb-3">
+							<label for="nombre_cliente_edit" class="form-label">Nombre:</label>
+							<input type="text" class="form-control" id="nombre_cliente_edit"
+								th:field="*{Nombre}" required>
+						</div>
+						<div class="mb-3">
+							<label for="apellido1_cliente_edit" class="form-label">Primer
+								Apellido:</label> <input type="text" class="form-control"
+								id="apellido1_cliente_edit" th:field="*{Apellido1}" required>
+						</div>
+						<div class="mb-3">
+							<label for="apellido2_cliente_edit" class="form-label">Segundo
+								Apellido:</label> <input type="text" class="form-control"
+								id="apellido2_cliente_edit" th:field="*{Apellido2}" required>
+						</div>
+						<div class="mb-3">
+							<label for="direccion_cliente_edit" class="form-label">Dirección:</label>
+							<input type="text" class="form-control"
+								id="direccion_cliente_edit" th:field="*{Direccion}" required>
+						</div>
+						<div class="mb-3">
+							<label for="telefono_cliente_edit" class="form-label">Teléfono:</label>
+							<input type="number" class="form-control"
+								id="telefono_cliente_edit" th:field="*{Telefono}" required>
+						</div>
+						<button type="submit" class="btn btn-success">Guardar
+							Cambios</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="confirmarEliminarClienteModal"
+		tabindex="-1" aria-labelledby="confirmarEliminarClienteModalLabel"
+		aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="confirmarEliminarClienteModalLabel">Confirmar
+						Eliminación</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"
+						aria-label="Close"></button>
+				</div>
+				<div class="modal-body">¿Estás seguro de que deseas eliminar
+					este cliente?</div>
+				<div class="modal-footer">
+					<form action="/Veterinaria/eliminarCliente" method="post"
+						th:object="${newcliente}">
+						<input type="hidden" id="clienteEliminarId" name="Dni"
+							th:field="*{Dni}">
+						<button type="button" class="btn btn-secondary"
+							data-bs-dismiss="modal">Cancelar</button>
+						<button type="submit" class="btn btn-danger">Eliminar</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script
+		src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.min.js"></script>
+
+	<script>
+		function abrirEditarClienteModal(button) {
+			const clienteId = button.getAttribute("data-id");
+			const nombre = button.getAttribute("data-nombre");
+			const apellido1 = button.getAttribute("data-apellido1");
+			const apellido2 = button.getAttribute("data-apellido2");
+			const direccion = button.getAttribute("data-direccion");
+			const telefono = button.getAttribute("data-telefono");
+
+			document.getElementById("clienteId").value = clienteId;
+			document.getElementById("nombre_cliente_edit").value = nombre;
+			document.getElementById("apellido1_cliente_edit").value = apellido1;
+			document.getElementById("apellido2_cliente_edit").value = apellido2;
+			document.getElementById("direccion_cliente_edit").value = direccion;
+			document.getElementById("telefono_cliente_edit").value = telefono;
+		}
+
+		function abrirEliminarClienteModal(button) {
+			const clienteId = button.getAttribute("data-id");
+			document.getElementById("clienteEliminarId").value = clienteId;
+		}
+	</script>
+</body>
+</html>
